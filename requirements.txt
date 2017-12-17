@@ -6,6 +6,7 @@ validate_email
 pyotp
 pysftp
 fdb
+fs==0.5.4
 sqlalchemy
 raven
 checksumdir
