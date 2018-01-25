@@ -25,7 +25,7 @@ addon | version | summary
 [auth_session_timeout](auth_session_timeout/) | 10.0.1.0.1 | This module disable all inactive sessions since a given delay
 [auth_signup_verify_email](auth_signup_verify_email/) | 10.0.1.0.0 | Force uninvited users to use a good email for signup
 [auth_supplier](auth_supplier/) | 10.0.1.0.0 | Auth Supplier
-[auth_totp](auth_totp/) | 10.0.1.0.0 | Allows users to enable MFA and add optional trusted devices
+[auth_totp](auth_totp/) | 10.0.1.0.1 | Allows users to enable MFA and add optional trusted devices
 [auth_totp_password_security](auth_totp_password_security/) | 10.0.1.0.0 | auth_totp and password_security compatibility
 [auth_user_case_insensitive](auth_user_case_insensitive/) | 10.0.1.0.0 | Makes the user login field case insensitive
 [auto_backup](auto_backup/) | 10.0.1.0.2 | Backups database
@@ -79,7 +79,7 @@ addon | version | summary
 [password_security](password_security/) | 10.0.1.1.2 | Allow admin to set password security requirements.
 [res_config_settings_enterprise_remove](res_config_settings_enterprise_remove/) | 10.0.1.0.0 | Remove fields in all settings views marked as enterprise
 [scheduler_error_mailer](scheduler_error_mailer/) | 10.0.1.0.0 | Scheduler Error Mailer
-[sentry](sentry/) | 10.0.1.0.0 | Report Odoo errors to Sentry
+[sentry](sentry/) | 10.0.1.0.1 | Report Odoo errors to Sentry
 [sequence_check_digit](sequence_check_digit/) | 10.0.1.0.0 | Adds a check digit on sequences
 [server_environment](server_environment/) | 10.0.1.2.0 | move some configurations out of the database
 [server_environment_files_sample](server_environment_files_sample/) | 10.0.1.0.0 | sample config file for server_environment
