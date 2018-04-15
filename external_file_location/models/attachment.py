@@ -17,17 +17,24 @@ class IrAttachmentMetadata(models.Model):
     file_type = fields.Selection(
         selection_add=[
             ('export_external_location',
-             'Export File (External location)')
+             'Export File (External location)'),
+            ('impex_external_location',
+             'Import Export File (External location)')
         ])
 
     @api.multi
     def _run(self):
         super(IrAttachmentMetadata, self)._run()
         if self.file_type == 'export_external_location':
-            protocols = self.env['external.file.location']._get_classes()
             location = self.location_id
-            cls = protocols.get(location.protocol)[1]
             path = os.path.join(self.task_id.filepath, self.datas_fname)
-            with cls.connect(location) as conn:
-                datas = base64.decodestring(self.datas)
-                conn.setcontents(path, data=datas)
+        elif self.file_type == 'impex_external_location':
+            location = self.task_id.export_task_id.location_id
+            path = os.path.join(self.task_id.export_task_id.filepath, self.datas_fname)
+        else:
+            return
+        protocols = self.env['external.file.location']._get_classes()
+        cls = protocols.get(location.protocol)[1]
+        with cls.connect(location) as conn:
+            datas = base64.decodestring(self.datas)
+            conn.setcontents(path, data=datas)

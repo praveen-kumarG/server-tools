@@ -54,7 +54,7 @@ class Task(models.Model):
     name = fields.Char(required=True)
 
     method_type = fields.Selection(
-        [('import', 'Import'), ('export', 'Export')],
+        [('import', 'Import'), ('export', 'Export'), ('impexp', 'Import & Export')],
         required=True)
 
     filename = fields.Char(help='File name which is imported.'
@@ -64,6 +64,8 @@ class Task(models.Model):
 
     location_id = fields.Many2one('external.file.location', string='Location',
                                   required=True)
+    export_task_id = fields.Many2one('external.file.task', string='Export Task',
+                                  required=False)
 
     attachment_ids = fields.One2many('ir.attachment.metadata', 'task_id',
                                      string='Attachment')
@@ -145,6 +147,8 @@ class Task(models.Model):
                 task.run_import()
             elif task.method_type == 'export':
                 task.run_export()
+            elif task.method_type == 'impexp':
+                task.with_context(impexp=True).run_import()
 
     @api.multi
     def run_import(self):
@@ -152,6 +156,7 @@ class Task(models.Model):
         protocols = self.env['external.file.location']._get_classes()
         cls = protocols.get(self.location_id.protocol)[1]
         attach_obj = self.env['ir.attachment.metadata']
+        impex = self.env.context.get('impexp')
         try:
             connection = cls.connect(self.location_id)
             with connection as conn:
@@ -175,6 +180,8 @@ class Task(models.Model):
                                         md5_datas = md5_file.read().rstrip('\r\n')
                                     attach_vals = self._prepare_attachment_vals(
                                         datas, file_name, md5_datas)
+                                    if impex:
+                                        attach_vals['file_type'] = 'impex_external_location'
                                     attachment = attach_obj.with_env(new_env).create(
                                         attach_vals)
                                     new_full_path = False
@@ -211,6 +218,8 @@ class Task(models.Model):
                                     # move on to process other files
                                 else:
                                     new_env.cr.commit()
+                                if impex:
+                                    attachment.run()
                 except:
                     _logger.error('Directory %s does not exist', self.filepath)
                     return
