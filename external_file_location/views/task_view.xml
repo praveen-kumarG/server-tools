@@ -30,6 +30,9 @@
                         <field name="export_task_id" colspan="2"
                                attrs="{'invisible':[('method_type','not in',['impexp'])], 'required':[('method_type', 'in', ['impexp'])]}"/>
                         <span colspan="2"/>
+                        <field name="unique_name" colspan="2"
+                               attrs="{'invisible':[('method_type','not in',['impexp'])], 'required':[('method_type', 'in', ['impexp'])]}"/>
+                        <span colspan="2"/>
                         <field name="filename" colspan="4"
                                attrs="{'invisible':[('method_type','not in',['import','impexp'])], 'required':[('method_type', 'in', ['import','impexp'])]}"/>
                         <field name="filepath" colspan="4"/>

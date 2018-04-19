@@ -66,6 +66,7 @@ class Task(models.Model):
                                   required=True)
     export_task_id = fields.Many2one('external.file.task', string='Export Task',
                                   required=False)
+    unique_name = fields.Boolean(help='Export file with uuid name')
 
     attachment_ids = fields.One2many('ir.attachment.metadata', 'task_id',
                                      string='Attachment')
@@ -165,6 +166,7 @@ class Task(models.Model):
                     files = conn.listdir(path=self.filepath,
                                          wildcard=self.filename or '',
                                          files_only=True)
+#                    import pdb; pdb.set_trace()
                     for file_name in files:
                         with api.Environment.manage():
                             with odoo.registry(
@@ -209,17 +211,20 @@ class Task(models.Model):
                                         if self.md5_check:
                                             conn.remove(full_path + '.md5')
                                 except Exception, e:
-                                    new_env.cr.rollback()
+#                                    new_env.cr.rollback()
+                                    new_env.cr.close()
                                     _logger.error('Error importing file %s '
                                                   'from %s: %s',
                                                   file_name,
                                                   self.filepath,
                                                   e)
+
+                                    continue
                                     # move on to process other files
                                 else:
                                     new_env.cr.commit()
-                                if impex:
-                                    attachment.run()
+                                    if impex:
+                                        attachment.run()
                 except:
                     _logger.error('Directory %s does not exist', self.filepath)
                     return

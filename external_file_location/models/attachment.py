@@ -30,7 +30,10 @@ class IrAttachmentMetadata(models.Model):
             path = os.path.join(self.task_id.filepath, self.datas_fname)
         elif self.file_type == 'impex_external_location':
             location = self.task_id.export_task_id.location_id
-            path = os.path.join(self.task_id.export_task_id.filepath, self.datas_fname)
+            fname = self.datas_fname
+            if self.task_id.unique_name:
+                fname = str(self.internal_hash) + '.pdf'
+            path = os.path.join(self.task_id.export_task_id.filepath, fname)
         else:
             return
         protocols = self.env['external.file.location']._get_classes()
