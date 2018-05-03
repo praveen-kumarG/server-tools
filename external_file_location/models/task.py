@@ -11,6 +11,7 @@ from base64 import b64encode
 import odoo
 from odoo import models, fields, api
 from odoo import tools
+from odoo.tools.translate import _
 
 _logger = logging.getLogger(__name__)
 
@@ -166,13 +167,12 @@ class Task(models.Model):
                     files = conn.listdir(path=self.filepath,
                                          wildcard=self.filename or '',
                                          files_only=True)
-#                    import pdb; pdb.set_trace()
                     for file_name in files:
-                        with api.Environment.manage():
-                            with odoo.registry(
-                                    self.env.cr.dbname).cursor() as new_cr:
-                                new_env = api.Environment(new_cr, self.env.uid,
-                                                          self.env.context)
+#                        with api.Environment.manage():
+#                            with odoo.registry(
+#                                    self.env.cr.dbname).cursor() as new_cr:
+#                                new_env = api.Environment(new_cr, self.env.uid,
+#                                                          self.env.context)
                                 try:
                                     full_path = os.path.join(self.filepath, file_name)
                                     file_data = conn.open(full_path, 'rb')
@@ -212,7 +212,7 @@ class Task(models.Model):
                                             conn.remove(full_path + '.md5')
                                 except Exception, e:
 #                                    new_env.cr.rollback()
-                                    new_env.cr.close()
+#                                    new_env.cr.close()
                                     _logger.error('Error importing file %s '
                                                   'from %s: %s',
                                                   file_name,
@@ -222,7 +222,7 @@ class Task(models.Model):
                                     continue
                                     # move on to process other files
                                 else:
-                                    new_env.cr.commit()
+                                    self.env.cr.commit()
                                     if impex:
                                         attachment.run()
                 except:
