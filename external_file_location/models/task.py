@@ -222,7 +222,7 @@ class Task(models.Model):
                                     continue
                                     # move on to process other files
                                 else:
-#                                    self.env.cr.commit()
+                                    self.env.cr.commit()
                                     if impex:
                                         attachment.run()
                 except:
