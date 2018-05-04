@@ -184,7 +184,7 @@ class Task(models.Model):
                                         datas, file_name, md5_datas)
                                     if impex:
                                         attach_vals['file_type'] = 'impex_external_location'
-                                    attachment = attach_obj.with_env(new_env).create(
+                                    attachment = attach_obj.create(
                                         attach_vals)
                                     new_full_path = False
                                     if self.after_import == 'rename':
@@ -222,7 +222,7 @@ class Task(models.Model):
                                     continue
                                     # move on to process other files
                                 else:
-                                    self.env.cr.commit()
+#                                    self.env.cr.commit()
                                     if impex:
                                         attachment.run()
                 except:
