@@ -7,6 +7,8 @@ import datetime
 import logging
 import os
 from base64 import b64encode
+from base64 import b64decode
+import hashlib
 
 import odoo
 from odoo import models, fields, api
@@ -108,6 +110,14 @@ class Task(models.Model):
                 ]
 
     @api.multi
+    def _existing_hash(self, datas):
+        self.ensure_one()
+        hash = hashlib.md5(b64decode(datas)).hexdigest()
+        if len(self.env['ir.attachment.metadata'].search([('internal_hash','=',hash),('location_id','=',self.location_id.id)])) > 0:
+            return True
+        return False
+
+    @api.multi
     def _prepare_attachment_vals(self, datas, filename, md5_datas):
         self.ensure_one()
         vals = {
@@ -168,63 +178,65 @@ class Task(models.Model):
                                          wildcard=self.filename or '',
                                          files_only=True)
                     for file_name in files:
-#                        with api.Environment.manage():
-#                            with odoo.registry(
-#                                    self.env.cr.dbname).cursor() as new_cr:
-#                                new_env = api.Environment(new_cr, self.env.uid,
-#                                                          self.env.context)
-                                try:
-                                    full_path = os.path.join(self.filepath, file_name)
-                                    file_data = conn.open(full_path, 'rb')
-                                    datas = file_data.read()
-                                    if self.md5_check:
-                                        md5_file = conn.open(full_path + '.md5', 'rb')
-                                        md5_datas = md5_file.read().rstrip('\r\n')
-                                    attach_vals = self._prepare_attachment_vals(
-                                        datas, file_name, md5_datas)
-                                    if impex:
-                                        attach_vals['file_type'] = 'impex_external_location'
-                                    attachment = attach_obj.create(
-                                        attach_vals)
-                                    new_full_path = False
-                                    if self.after_import == 'rename':
-                                        new_name = self._template_render(
-                                            self.new_name, attachment)
-                                        new_full_path = os.path.join(
-                                            self.filepath, new_name)
-                                    elif self.after_import == 'move':
-                                        new_full_path = os.path.join(
-                                            self.move_path, file_name)
-                                    elif self.after_import == 'move_rename':
-                                        new_name = self._template_render(
-                                            self.new_name, attachment)
-                                        new_full_path = os.path.join(
-                                            self.move_path, new_name)
-                                    if new_full_path:
-                                        conn.rename(full_path, new_full_path)
-                                        if self.md5_check:
-                                            conn.rename(
-                                                full_path + '.md5',
-                                                new_full_path + '/md5')
-                                    if self.after_import == 'delete':
-                                        conn.remove(full_path)
-                                        if self.md5_check:
-                                            conn.remove(full_path + '.md5')
-                                except Exception, e:
-#                                    new_env.cr.rollback()
-#                                    new_env.cr.close()
-                                    _logger.error('Error importing file %s '
-                                                  'from %s: %s',
-                                                  file_name,
-                                                  self.filepath,
-                                                  e)
+                        double_file = False
+                        try:
+                            full_path = os.path.join(self.filepath, file_name)
+                            file_data = conn.open(full_path, 'rb')
+                            datas = file_data.read()
+                            if self.md5_check:
+                                md5_file = conn.open(full_path + '.md5', 'rb')
+                                md5_datas = md5_file.read().rstrip('\r\n')
+                            if not self._existing_hash(datas):
+                                attach_vals = self._prepare_attachment_vals(
+                                    datas, file_name, md5_datas)
+                                if impex:
+                                    attach_vals['file_type'] = 'impex_external_location'
+                                attachment = attach_obj.create(
+                                    attach_vals)
+                            else:
+                                double_file = True
 
-                                    continue
-                                    # move on to process other files
-                                else:
-                                    self.env.cr.commit()
-                                    if impex:
-                                        attachment.run()
+                            new_full_path = False
+                            if double_file:
+                                new_name = file_name + '.double'
+                                new_full_path = os.path.join(
+                                    self.filepath, new_name)
+                            elif self.after_import == 'rename':
+                                new_name = self._template_render(
+                                    self.new_name, attachment)
+                                new_full_path = os.path.join(
+                                    self.filepath, new_name)
+                            elif self.after_import == 'move':
+                                new_full_path = os.path.join(
+                                    self.move_path, file_name)
+                            elif self.after_import == 'move_rename':
+                                new_name = self._template_render(
+                                    self.new_name, attachment)
+                                new_full_path = os.path.join(
+                                    self.move_path, new_name)
+                            if new_full_path:
+                                conn.rename(full_path, new_full_path)
+                                if self.md5_check:
+                                    conn.rename(
+                                        full_path + '.md5',
+                                        new_full_path + '/md5')
+                            if self.after_import == 'delete' and not double_file:
+                                conn.remove(full_path)
+                                if self.md5_check:
+                                    conn.remove(full_path + '.md5')
+                        except Exception, e:
+                            _logger.error('Error importing file %s '
+                                          'from %s: %s',
+                                          file_name,
+                                          self.filepath,
+                                          e)
+
+                            continue
+                            # move on to process other files
+                        else:
+                            self.env.cr.commit()
+                            if impex and not double_file:
+                                attachment.run()
                 except:
                     _logger.error('Directory %s does not exist', self.filepath)
                     return
