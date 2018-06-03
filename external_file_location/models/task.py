@@ -55,51 +55,43 @@ class Task(models.Model):
     _description = 'External file task'
 
     name = fields.Char(required=True)
-
     method_type = fields.Selection(
         [('import', 'Import'), ('export', 'Export'), ('impexp', 'Import & Export')],
         required=True)
-
     filename = fields.Char(help='File name which is imported.'
                                 'You can use file pattern like *.txt'
                                 'to import all txt files')
     filepath = fields.Char(help='Path to imported/exported file')
-
     location_id = fields.Many2one('external.file.location', string='Location',
                                   required=True)
     export_task_id = fields.Many2one('external.file.task', string='Export Task',
                                   required=False)
     unique_name = fields.Boolean(help='Export file with uuid name')
-
+    export_extension = fields.Char(help='Extension for export files when unique_name id true'
+                                        'You can use extension pattern like .txt'
+                                        'to export as .txt files')
     attachment_ids = fields.One2many('ir.attachment.metadata', 'task_id',
                                      string='Attachment')
-
     move_path = fields.Char(string='Move Path',
                             help='Imported File will be moved to this path')
-
     new_name = fields.Char(string='New Name',
                            help='Imported File will be renamed to this name'
                                 'Name can use mako template where obj is an '
                                 'ir_attachement. template exemple : '
                                 '  ${obj.name}-${obj.create_date}.csv')
-
     md5_check = fields.Boolean(help='Control file integrity after import with'
                                     ' a md5 file')
-
     after_import = fields.Selection(selection='_get_action',
                                     help='Action after import a file')
-
     company_id = fields.Many2one(
         'res.company', 'Company',
         default=lambda self: self.env['res.company']._company_default_get(
             'external.file.task'))
-
     file_type = fields.Selection(
         selection=[],
         string="File Type",
         help="The file type determines an import method to be used "
              "to parse and transform data before their import in ERP")
-
     active = fields.Boolean(default=True)
 
     def _get_action(self):

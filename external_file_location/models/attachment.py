@@ -32,7 +32,7 @@ class IrAttachmentMetadata(models.Model):
             location = self.task_id.export_task_id.location_id
             fname = self.datas_fname
             if self.task_id.unique_name:
-                fname = str(self.internal_hash) + '.pdf'
+                fname = str(self.internal_hash) + str(self.task_id.export_extension)
             path = os.path.join(self.task_id.export_task_id.filepath, fname)
         else:
             return
