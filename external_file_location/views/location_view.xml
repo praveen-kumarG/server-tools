@@ -30,11 +30,34 @@
                         <field name="task_ids" colspan="4" nolabel="1"
                                context="{'hide_location': True, 'protocol': protocol}">
                             <tree>
-                                <field name="name"/>
-                                <field name="name"/>
+                                <field name="name" select="1"/>
                                 <field name="method_type"/>
+                                <field name="export_task_id"
+                                       attrs="{'invisible':[('method_type','not in',['impexp'])], 'required':[('method_type', 'in', ['impexp'])]}"/>
+                                <field name="unique_name"
+                                       attrs="{'invisible':[('method_type','not in',['impexp'])], 'required':[('method_type', 'in', ['impexp'])]}"/>
                                 <field name="filename"/>
                                 <field name="filepath"/>
+                                <field name="export_extension"
+                                       attrs="{'invisible':[('method_type','not in',['impexp'])], 'required':[('method_type', 'in', ['impexp'])]}"/>
+                                <field name="filename"
+                                       attrs="{'invisible':[('method_type','not in',['import','impexp'])], 'required':[('method_type', 'in', ['import','impexp'])]}"/>
+                                <field name="company_id" />
+                                <field name="after_import" attrs="{'invisible':[('method_type','not in',['import','impexp'])]}"/>
+                                <field name="move_path"
+                                       attrs="{'invisible':['|', '&amp;',
+                                                ('after_import','!=','move'),
+                                                ('after_import','!=','move_rename'),
+                                                ('method_type','not in',['import','impexp'])]}"/>
+                                <field name="new_name"
+                                       attrs="{'invisible': ['|', '&amp;',
+                                                ('after_import','!=','rename'),
+                                                ('after_import','!=','move_rename'),
+                                                ('method_type','not in',['import','impexp'])]}"/>
+                                <field name="md5_check"
+                                       attrs="{'invisible':[('method_type','not in',['import','impexp'])]}"/>
+                                <field name="active" />
+                                <field name="file_type" attrs="{'invisible':[('method_type','not in',['import','impexp'])]}"/>
                             </tree>
                         </field>
                         <field name="hide_login" invisible="1"/>
