@@ -104,7 +104,7 @@ class Task(models.Model):
     @api.multi
     def _existing_hash(self, datas):
         self.ensure_one()
-        hash = hashlib.md5(b64decode(datas)).hexdigest()
+        hash = hashlib.md5(datas).hexdigest()
         if len(self.env['ir.attachment.metadata'].search([('internal_hash','=',hash),('location_id','=',self.location_id.id)])) > 0:
             return True
         return False
@@ -170,6 +170,7 @@ class Task(models.Model):
                                          wildcard=self.filename or '',
                                          files_only=True)
                     for file_name in files:
+                        import pdb; pdb.set_trace()
                         double_file = False
                         try:
                             full_path = os.path.join(self.filepath, file_name)
