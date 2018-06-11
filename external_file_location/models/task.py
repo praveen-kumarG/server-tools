@@ -170,7 +170,6 @@ class Task(models.Model):
                                          wildcard=self.filename or '',
                                          files_only=True)
                     for file_name in files:
-                        import pdb; pdb.set_trace()
                         double_file = False
                         try:
                             full_path = os.path.join(self.filepath, file_name)
