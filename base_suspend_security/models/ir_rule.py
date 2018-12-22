@@ -18,7 +18,6 @@
 #
 ##############################################################################
 from odoo import models, api
-from odoo.osv.query import Query
 from ..base_suspend_security import BaseSuspendSecurityUid
 
 
@@ -28,8 +27,5 @@ class IrRule(models.Model):
     @api.model
     def domain_get(self, model_name, mode='read'):
         if isinstance(self.env.uid, BaseSuspendSecurityUid):
-            # Compatibility with auto_join refactoring in
-            # https://github.com/stefanrijnhart/odoo/tree/\
-            # fix/10.0/auto_join_use_left_join
-            return Query(['"%s"' % self.pool[model_name]._table])
+            return [], [], ['"%s"' % self.pool[model_name]._table]
         return super(IrRule, self).domain_get(model_name, mode=mode)
