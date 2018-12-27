@@ -11,3 +11,4 @@ sqlalchemy
 raven
 checksumdir
 python-stdnum
+pyopenssl
