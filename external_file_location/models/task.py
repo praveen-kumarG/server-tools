@@ -233,7 +233,8 @@ class Task(models.Model):
                     _logger.error('Directory %s does not exist', self.filepath)
                     return
         except:
-            _logger.error('Root directory %s does not exist', self.filepath)
+            _logger.error('Location %s does not exist or is not reachable',
+                          self.location_id.address)
             return
 
     @api.multi
